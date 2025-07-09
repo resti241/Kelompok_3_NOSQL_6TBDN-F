@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Riwayat Pembelian</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <h3 class="mb-4">Riwayat Pembelian</h3>
+    <a href="{{ url_for('index') }}" class="btn btn-link mb-3">&larr; Kembali ke Beranda</a>
+
+    {% if history %}
+    <div class="row row-cols-1 g-4">
+      {% for item in history %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="row g-0">
+            <div class="col-md-3">
+              <img src="{{ item.gambar }}" class="img-fluid rounded-start" alt="{{ item.nama }}" style="height:100%;object-fit:cover;">
+            </div>
+            <div class="col-md-9">
+              <div class="card-body">
+                <h5 class="card-title">{{ item.nama }}</h5>
+                <p class="card-text">Harga: Rp{{ "{:,}".format(item.harga) }}</p>
+                <p class="card-text"><small class="text-muted">Dibeli pada {{ item.timestamp.strftime("%d %B %Y, %H:%M:%S") }}</small></p>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                  <!-- Tombol Beli Lagi -->
+                    <form action="{{ url_for('beli_sekarang') }}" method="post">
+                    <input type="hidden" name="product_id" value="{{ item._id.__str__() }}">
+                    <input type="hidden" name="kuantitas" value="1">
+                    <button type="submit" class="btn btn-success btn-sm">🛒 Beli Lagi</button>
+                    </form>
+
+
+                  <!-- Tombol Hapus Riwayat -->
+                <form action="{{ url_for('hapus_riwayat') }}" method="post">
+                <input type="hidden" name="product_id" value="{{ item._id }}">
+                <input type="hidden" name="timestamp" value="{{ item.timestamp.isoformat() }}">  <!-- Tambahkan ini -->
+                <button type="submit" class="btn btn-danger btn-sm">🗑️ Hapus</button>
+                </form>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="text-center">Belum ada riwayat pembelian.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

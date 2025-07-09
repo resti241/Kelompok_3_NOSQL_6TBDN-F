@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Beli Sekarang</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <h3>Checkout Produk</h3>
+
+    {% if produk %}
+    <form action="{{ url_for('proses_pembayaran') }}" method="post">
+      <table class="table table-bordered mt-3">
+        <thead class="table-light">
+          <tr>
+            <th>Gambar</th>
+            <th>Nama Produk</th>
+            <th>Kategori</th>
+            <th>Harga Satuan</th>
+            <th style="width:120px;">Kuantitas</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in produk %}
+          <tr>
+            <td style="width: 120px;">
+              <img src="{{ item.gambar }}" alt="{{ item.nama }}" class="img-fluid rounded" style="max-height: 80px;">
+            </td>
+            <td>{{ item.nama }}</td>
+            <td>{{ item.kategori }}</td>
+            <td>Rp{{ "{:,}".format(item.harga) }}</td>
+            <td>
+              <div class="input-group input-group-sm">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeQty('{{ item._id }}', -1)">−</button>
+                <input
+                  type="number"
+                  min="1"
+                  id="qty-{{ item._id }}"
+                  name="kuantitas_{{ item._id }}"
+                  value="{{ item.kuantitas }}"
+                  class="form-control text-center"
+                  style="max-width: 60px;"
+                  data-price="{{ item.harga }}"
+                  onchange="updateSubtotal('{{ item._id }}', '{{ item.harga }}')"
+                >
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeQty('{{ item._id }}', 1)">+</button>
+              </div>
+              <input type="hidden" name="produk_id_{{ loop.index0 }}" value="{{ item._id }}">
+            </td>
+            <td id="subtotal-{{ item._id }}">Rp{{ "{:,}".format(item.harga * item.kuantitas) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="5" class="text-end">Total</th>
+            <th id="grand-total">Rp{{ "{:,}".format(total) }}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="mb-3">
+        <label for="metode" class="form-label">Metode Pembayaran</label>
+        <select name="metode_pembayaran" id="metode" class="form-select" required>
+          <option value="">-- Pilih Metode --</option>
+          <option value="transfer_bank">Transfer Bank</option>
+          <option value="e-wallet">E-Wallet</option>
+          <option value="cod">Cash on Delivery</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-success">Bayar Sekarang</button>
+      <a href="{{ url_for('keranjang') }}" class="btn btn-secondary">Kembali ke Keranjang</a>
+    </form>
+    {% else %}
+      <p>Keranjang kosong. Tidak ada produk untuk dibeli.</p>
+    {% endif %}
+  </div>
+
+  <script>
+    function changeQty(id, delta) {
+      const input = document.getElementById(`qty-${id}`);
+      let val = parseInt(input.value) || 1;
+      val = Math.max(1, val + delta);
+      input.value = val;
+      const price = parseInt(input.dataset.price);
+      updateSubtotal(id, price);
+    }
+
+    function updateSubtotal(id, priceStr) {
+      const price = parseInt(priceStr);
+      const qty = parseInt(document.getElementById(`qty-${id}`).value) || 1;
+      const subtotalEl = document.getElementById(`subtotal-${id}`);
+      const newSub = price * qty;
+      subtotalEl.innerText = 'Rp' + newSub.toLocaleString('id-ID');
+
+      // Hitung ulang grand total
+      let gt = 0;
+      document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
+        const num = parseInt(el.innerText.replace(/[^0-9]/g, '')) || 0;
+        gt += num;
+      });
+      document.getElementById('grand-total').innerText = 'Rp' + gt.toLocaleString('id-ID');
+    }
+  </script>
+</body>
+</html>

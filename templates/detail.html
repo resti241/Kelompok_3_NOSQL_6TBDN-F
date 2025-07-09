@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detail Produk</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <a href="{{ url_for('index') }}" class="btn btn-link">&larr; Kembali ke Beranda</a>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if produk %}
+    <div class="card mt-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-5">
+            <img src="{{ produk.gambar }}" alt="{{ produk.nama }}" class="img-fluid rounded mb-3" style="max-height: 300px;">
+          </div>
+          <div class="col-md-7">
+            <h3>{{ produk.nama }}</h3>
+            <p class="text-muted">{{ produk.kategori }} - Rp{{ "{:,}".format(produk.harga) }}</p>
+            <p>{{ produk.deskripsi }}</p>
+            <p><strong>Tags:</strong> {{ produk.tags | join(', ') }}</p>
+            <p class="text-muted mb-2">❤️ {{ produk.likes }} | Dibeli: {{ produk.jumlah_beli }}x</p>
+
+            <!-- Tombol Beli Sekarang & Tambah ke Keranjang -->
+            <div class="d-flex gap-2 mt-3">
+              <form action="{{ url_for('beli_sekarang') }}" method="post">
+                <input type="hidden" name="product_id" value="{{ produk._id }}">
+                <button type="submit" class="btn btn-success">Beli Sekarang</button>
+              </form>
+
+              <form action="{{ url_for('tambah_keranjang') }}" method="post">
+                <input type="hidden" name="product_id" value="{{ produk._id }}">
+                <button type="submit" class="btn btn-outline-secondary" title="Tambah ke Keranjang">
+                  🛒
+                </button>
+              </form>
+
+              <form action="{{ url_for('like_produk', id=produk._id) }}" method="post">
+                <button type="submit" class="btn btn-outline-danger" title="Suka produk">
+                  ❤️ Like
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Produk Serupa -->
+    <hr>
+    <h4 class="mt-4">Rekomendasi Produk Serupa</h4>
+    <div class="row">
+      {% if rekomendasi %}
+        {% for item in rekomendasi %}
+        <div class="col-md-3 mb-3">
+          <div class="card h-100">
+            <a href="{{ url_for('detail', id=item._id) }}" style="text-decoration: none; color: inherit;">
+              <img src="{{ item.gambar }}" class="card-img-top" alt="{{ item.nama }}" style="max-height: 160px; object-fit: cover;">
+              <div class="card-body">
+                <h5 class="card-title">{{ item.nama }}</h5>
+                <p class="card-text">{{ item.kategori }}</p>
+                <p class="card-text">Rp{{ "{:,}".format(item.harga) }}</p>
+                <p class="card-text text-muted mb-0">❤️ {{ item.likes }} | Dibeli: {{ item.jumlah_beli }}x</p>
+              </div>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="mt-2">Tidak ada produk serupa.</p>
+      {% endif %}
+    </div>
+
+    <!-- Produk Co-Purchase -->
+    <hr>
+    <h4 class="mt-4">Rekomendasi Produk Sering Dibeli Bersamaan</h4>
+    <div class="row">
+      {% if copurchase %}
+        {% for item in copurchase %}
+        <div class="col-md-3 mb-3">
+          <div class="card h-100">
+            <a href="{{ url_for('detail', id=item._id) }}" style="text-decoration: none; color: inherit;">
+              <img src="{{ item.gambar }}" class="card-img-top" alt="{{ item.nama }}" style="max-height: 160px; object-fit: cover;">
+              <div class="card-body">
+                <h5 class="card-title">{{ item.nama }}</h5>
+                <p class="card-text">{{ item.kategori }}</p>
+                <p class="card-text">Rp{{ "{:,}".format(item.harga) }}</p>
+                <p class="card-text text-muted mb-0">❤️ {{ item.likes }} | Dibeli: {{ item.jumlah_beli }}x</p>
+              </div>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="mt-2">Tidak ada produk co-purchase.</p>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning mt-3">Produk tidak ditemukan.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

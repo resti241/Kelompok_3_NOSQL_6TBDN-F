@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shopee Rekomendasi - Beranda Produk</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Navbar dengan icon Keranjang, Riwayat, Logout (panah kanan dalam kotak) -->
+  <nav class="navbar navbar-light bg-light px-4">
+    <span class="navbar-brand">Hi, {{ user }} 👋</span>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('keranjang') }}" class="btn btn-outline-secondary" title="Lihat Keranjang">🛒</a>
+      <a href="{{ url_for('riwayat') }}" class="btn btn-outline-primary" title="Riwayat Pembelian">📜</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-danger" title="Logout">➡️</a>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Form pencarian -->
+    <form method="get" class="mb-3" autocomplete="off" id="searchForm">
+      <input
+        type="text"
+        name="tag"
+        class="form-control"
+        placeholder="Cari berdasarkan tag"
+        id="tagInput"
+        value="{{ request.args.get('tag', '') }}"
+        onkeydown="if(event.key === 'Enter'){ return validateSearch(); }"
+      >
+    </form>
+
+    <!-- Daftar produk -->
+    <div class="row">
+      {% if produk %}
+        {% for item in produk %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 shadow-sm">
+            <a href="{{ url_for('detail', id=item._id) }}" style="text-decoration: none; color: inherit;">
+              <img src="{{ item.gambar }}" class="card-img-top" alt="{{ item.nama }}" style="max-height: 180px; object-fit: cover;">
+              <div class="card-body">
+                <h5 class="card-title">{{ item.nama }}</h5>
+                <p class="card-text mb-1">Kategori: {{ item.kategori }}</p>
+                <p class="card-text mb-1">Harga: Rp{{ "{:,}".format(item.harga) }}</p>
+                <p class="card-text text-muted mb-0">❤️ {{ item.likes }} | Dibeli: {{ item.jumlah_beli }}x</p>
+              </div>
+            </a>
+
+            <!-- Tombol aksi -->
+            <div class="card-footer bg-white border-top-0 px-3 pb-3">
+              <div class="d-flex gap-2">
+                <form action="{{ url_for('beli_sekarang') }}" method="post" style="flex: 1;">
+                  <input type="hidden" name="product_id" value="{{ item._id }}">
+                  <button type="submit" class="btn btn-success w-100 btn-sm">🛍️ Beli</button>
+                </form>
+
+                <form action="{{ url_for('tambah_keranjang') }}" method="post" style="flex: 1;">
+                  <input type="hidden" name="product_id" value="{{ item._id }}">
+                  <button type="submit" class="btn btn-outline-secondary w-100 btn-sm">🛒</button>
+                </form>
+
+                <form action="{{ url_for('like_produk', id=item._id) }}" method="post" style="flex: 1;">
+                  <button type="submit" class="btn btn-outline-danger w-100 btn-sm" title="Suka produk">
+                    ❤️ Like
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-12">
+          <p class="text-center">Produk tidak ditemukan.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    function validateSearch() {
+      const tag = document.getElementById('tagInput').value.trim();
+      if (tag === '') {
+        alert('Silakan masukkan tag untuk pencarian.');
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Keranjang Saya</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <h3 class="mb-4">Keranjang Belanja</h3>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    {% if produk_keranjang %}
+    <!-- Satu-satunya form, membungkus seluruh daftar dan tombol -->
+    <form id="cartForm" method="post">
+      <div class="row row-cols-1 g-4">
+        {% for item in produk_keranjang %}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="row g-0">
+              <div class="col-md-4">
+                <img src="{{ item.gambar }}" class="img-fluid rounded-start"
+                     alt="{{ item.nama }}" style="height:100%;object-fit:cover;">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">{{ item.nama }}</h5>
+                  <p class="card-text mb-1">Kategori: {{ item.kategori }}</p>
+                  <p class="card-text">Harga: Rp{{ "{:,}".format(item.harga) }}</p>
+
+                  <!-- Tombol +/− tanpa form terpisah: pakai button dengan formaction -->
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <button
+                      type="submit"
+                      formaction="{{ url_for('update_kuantitas') }}"
+                      formmethod="post"
+                      name="aksi"
+                      value="kurangi-{{ item._id }}"
+                      class="btn btn-outline-secondary btn-sm"
+                    >−</button>
+
+                    <strong>{{ item.kuantitas }}</strong>
+
+                    <button
+                      type="submit"
+                      formaction="{{ url_for('update_kuantitas') }}"
+                      formmethod="post"
+                      name="aksi"
+                      value="tambah-{{ item._id }}"
+                      class="btn btn-outline-secondary btn-sm"
+                    >+</button>
+                  </div>
+
+                  <!-- Checkbox tetap dikirim karena masih di dalam form -->
+                  <div class="form-check mt-3">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selected_ids"
+                           value="{{ item._id }}"
+                           id="item{{ loop.index }}">
+                    <label class="form-check-label" for="item{{ loop.index }}">
+                      Pilih produk ini
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Tombol aksi Hapus dan Beli Sekarang -->
+      <div class="d-flex justify-content-between mt-4">
+        <button
+          type="submit"
+          formaction="{{ url_for('hapus_dari_keranjang') }}"
+          formmethod="post"
+          class="btn btn-danger"
+        >
+          Hapus yang Dipilih
+        </button>
+        <button
+          type="submit"
+          formaction="{{ url_for('beli_sekarang') }}"
+          formmethod="post"
+          class="btn btn-success"
+        >
+          Beli Sekarang
+        </button>
+      </div>
+    </form>
+    {% else %}
+      <p class="text-center mt-4">Keranjang kamu masih kosong 🛒</p>
+    {% endif %}
+  </div>
+</body>
+</html>
