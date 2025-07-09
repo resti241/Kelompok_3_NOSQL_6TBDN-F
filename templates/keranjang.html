@@ -16,17 +16,21 @@
     {% endwith %}
 
     {% if produk_keranjang %}
+
     <!-- Satu-satunya form, membungkus seluruh daftar dan tombol -->
     <form id="cartForm" method="post">
       <div class="row row-cols-1 g-4">
+
         {% for item in produk_keranjang %}
         <div class="col">
           <div class="card h-100 shadow-sm">
             <div class="row g-0">
+
               <div class="col-md-4">
                 <img src="{{ item.gambar }}" class="img-fluid rounded-start"
                      alt="{{ item.nama }}" style="height:100%;object-fit:cover;">
               </div>
+
               <div class="col-md-8">
                 <div class="card-body">
                   <h5 class="card-title">{{ item.nama }}</h5>
@@ -35,6 +39,7 @@
 
                   <!-- Tombol +/− tanpa form terpisah: pakai button dengan formaction -->
                   <div class="d-flex align-items-center gap-2 mt-2">
+
                     <button
                       type="submit"
                       formaction="{{ url_for('update_kuantitas') }}"
@@ -77,6 +82,7 @@
 
       <!-- Tombol aksi Hapus dan Beli Sekarang -->
       <div class="d-flex justify-content-between mt-4">
+        
         <button
           type="submit"
           formaction="{{ url_for('hapus_dari_keranjang') }}"
